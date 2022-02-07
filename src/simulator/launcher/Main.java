@@ -38,6 +38,7 @@ public class Main {
 			// provided in the command line!
 			//
 			String[] remaining = line.getArgs();
+			System.out.println("Hola");
 			if (remaining.length > 0) {
 				String error = "Illegal arguments:";
 				for (String o : remaining)
