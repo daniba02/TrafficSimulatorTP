@@ -17,7 +17,6 @@ public class CityRoad extends Road{
 		} catch (LimitException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-			System.out.println("Hola");
 		}
 	}
 
