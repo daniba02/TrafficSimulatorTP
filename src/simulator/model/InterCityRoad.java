@@ -1,11 +1,12 @@
 package simulator.model;
 
 import simulator.exceptions.LimitException;
+import simulator.exceptions.SimulatorException;
 
 public class InterCityRoad extends Road{
 
 	InterCityRoad(String id, Junction srcJunc, Junction destJunc, int maxSpeed, int contLimit, int length,
-			Weather weather) {
+			Weather weather) throws SimulatorException {
 		super(id, srcJunc, destJunc, maxSpeed, contLimit, length, weather);
 		// TODO Auto-generated constructor stub
 	}
@@ -17,7 +18,7 @@ public class InterCityRoad extends Road{
 
 	@Override
 	void updateSpeedLimit() {
-		if (totalCO2 > alarma) {
+		if (totalCO2 > contLimit) {
 			speedLimit = maxSpeed / 2;
 		}
 		else speedLimit = maxSpeed;

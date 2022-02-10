@@ -10,21 +10,37 @@ import simulator.exceptions.SimulatorException;
 
 public abstract class Road extends SimulatedObject{
 
-	private Junction dest;
 	private Junction src;
+	private Junction dest;
 	private int length;
 	protected int maxSpeed;
 	protected int speedLimit;
-	protected int alarma;
+	protected int contLimit;
 	protected Weather weather;
 	protected int totalCO2;
 	private List<Vehicle> vehicle;
 	
-	Road(String id, Junction srcJunc, Junction destJunc, int maxSpeed,int contLimit, int length, Weather weather) {
+	Road(String id, Junction srcJunc, Junction destJunc, int maxSpeed,
+			int contLimit, int length, Weather weather) throws SimulatorException{
 		super(id);
 		this.src = srcJunc;
 		this.dest = destJunc;
+		
+		try {
+			compruebaSpeed(maxSpeed);
+			compruebaLimit(contLimit);
+			compruebaLength(length);
+			compruebaNull(srcJunc);
+			compruebaNull(weather);
+			this.maxSpeed = maxSpeed;
+			this.contLimit = contLimit;
+			this.length = length;
+			this.weather = weather;
 			
+		}
+		catch (LimitException ex) {
+			throw new SimulatorException(ex.getMessage());
+		}
 	}
 	
 	abstract void reduceTotalContamination();
@@ -142,7 +158,7 @@ public abstract class Road extends SimulatedObject{
 	}
 
 	public int getContLimit() {
-		return alarma;
+		return contLimit;
 	}
 
 	public Weather getWeather() {
@@ -156,7 +172,4 @@ public abstract class Road extends SimulatedObject{
 	public List<Vehicle> getVehicle() {
 		return Collections.unmodifiableList(vehicle);
 	}
-	
-	
-
 }

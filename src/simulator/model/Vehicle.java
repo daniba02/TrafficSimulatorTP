@@ -14,6 +14,7 @@ public class Vehicle extends SimulatedObject{
 
 	
 	private List<Junction> itinerary;
+	private List<Junction> privItinerary;
 	private int maxSpeed;
 	private int speed;
 	private VehicleStatus status;
@@ -29,37 +30,40 @@ public class Vehicle extends SimulatedObject{
 		try {
 			compruebaSpeed(maxSpeed);
 			compruebaContClass(contClass);
-			compruebaItinerario();
-			
+			compruebaItinerario(itinerary);
+			this.maxSpeed = maxSpeed;
+			this.contClass = contClass; 
+			this.itinerary = itinerary;
+			this.privItinerary = Collections.unmodifiableList(new ArrayList<>(itinerary));
 		}
 		catch (SimulatorException ex){
-			
-		}
-		finally {
-			this.maxSpeed = maxSpeed;
-			this.contClass = contClass;
+			throw new SimulatorException (ex.getMessage());
 		}
 	}
 
 	@Override
 	void advance(int time) {
+		int lastLocation = location;
+		int c;
 		if(status == VehicleStatus.TRAVELING) {
-			if (location + speed < distance) { 
-				// IMPORTANTE: En vez de distancia hay que usar la longitud de la carretera
+			if (location + speed < road.getLength()) { 
 				location = location + speed;
 			}
-			
 			else {
-				location = distance;
+				location = road.getLength();
 			}
 			
-			co2 += distance * contClass;
-			if (location >= distance) {
+			c = (contClass * (location - lastLocation));
+			co2 = co2 + c;
+			try {
+				road.addContaminacion(c);
+			} catch (SimulatorException e) {
+				e.printStackTrace();
+			}
+			if (location >= road.getLength()) {
 				status = VehicleStatus.WAITING;
 			}
 		}
-		
-		
 	}
 	
 	void moveToNextRoad() throws StatusException{
@@ -85,9 +89,9 @@ public class Vehicle extends SimulatedObject{
 	void setSpeed(int s) throws LimitException{
 		compruebaSpeed(s);
 		if (s > maxSpeed) {
-			speed = s;
+			speed = maxSpeed;
 		}
-		else speed = maxSpeed;
+		else speed = s;
 	}
 	
 	void setContaminationClass(int c) throws LimitException {
@@ -107,8 +111,10 @@ public class Vehicle extends SimulatedObject{
 		}
 	}
 	
-	public void compruebaItinerario() {
-		
+	public void compruebaItinerario(List<Junction> itinerary) throws LimitException{
+		if (itinerary.size()<2) {
+			throw new LimitException("El tamaño de la lista tiene que ser mínimo 2");
+		}
 	}
 
 	public List<Junction> getItinerary() {
@@ -143,6 +149,10 @@ public class Vehicle extends SimulatedObject{
 		return co2;
 	}
 	
-	
+	void velocidad0() {
+		if (status.name()!= "TRAVELING") {
+			speed = 0;
+		}
+	}
 
 }
