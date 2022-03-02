@@ -10,7 +10,7 @@ import simulator.exceptions.LimitException;
 import simulator.exceptions.SimulatorException;
 import simulator.exceptions.StatusException;
 
-public class Vehicle extends SimulatedObject{
+public class Vehicle extends SimulatedObject implements Comparable<Vehicle>{
 
 	
 	private List<Junction> itinerary;
@@ -24,7 +24,7 @@ public class Vehicle extends SimulatedObject{
 	private int co2;
 	private int distance;
 	
-	protected Vehicle(String id, int maxSpeed, int contClass, List<Junction> itinerary) throws SimulatorException {
+	Vehicle(String id, int maxSpeed, int contClass, List<Junction> itinerary) {
 		super(id);
 		
 		try {
@@ -36,8 +36,8 @@ public class Vehicle extends SimulatedObject{
 			this.itinerary = itinerary;
 			this.privItinerary = Collections.unmodifiableList(new ArrayList<>(itinerary));
 		}
-		catch (SimulatorException ex){
-			throw new SimulatorException (ex.getMessage());
+		catch (IllegalArgumentException ex){
+			throw new IllegalArgumentException (ex.getMessage());
 		}
 	}
 
@@ -86,7 +86,7 @@ public class Vehicle extends SimulatedObject{
 		return null;
 	}
 	
-	void setSpeed(int s) throws LimitException{
+	void setSpeed(int s) throws IllegalArgumentException{
 		compruebaSpeed(s);
 		if (s > maxSpeed) {
 			speed = maxSpeed;
@@ -94,26 +94,26 @@ public class Vehicle extends SimulatedObject{
 		else speed = s;
 	}
 	
-	void setContaminationClass(int c) throws LimitException {
+	void setContaminationClass(int c) throws IllegalArgumentException {
 		compruebaContClass(c);
 		contClass = c;
 	}
 	
-	void compruebaSpeed(int maxSpeed) throws LimitException {
+	void compruebaSpeed(int maxSpeed) throws IllegalArgumentException {
 		if (maxSpeed < 0) {
-			throw new LimitException("La velocidad tiene que ser positiva");
+			throw new IllegalArgumentException("La velocidad tiene que ser positiva");
 		}
 	}
 	
-	void compruebaContClass(int contClass) throws LimitException {
+	void compruebaContClass(int contClass) throws IllegalArgumentException {
 		if (contClass < 0 || contClass > 10) {
-			throw new LimitException("El grado de contaminacion tiene que estar entre 0 y 10");
+			throw new IllegalArgumentException("El grado de contaminacion tiene que estar entre 0 y 10");
 		}
 	}
 	
-	public void compruebaItinerario(List<Junction> itinerary) throws LimitException{
+	public void compruebaItinerario(List<Junction> itinerary) throws IllegalArgumentException{
 		if (itinerary.size()<2) {
-			throw new LimitException("El tamaño de la lista tiene que ser mínimo 2");
+			throw new IllegalArgumentException("El tamaño de la lista tiene que ser mínimo 2");
 		}
 	}
 
@@ -153,6 +153,15 @@ public class Vehicle extends SimulatedObject{
 		if (status.name()!= "TRAVELING") {
 			speed = 0;
 		}
+	}
+	
+	@Override
+	public int compareTo(Vehicle v) { 
+		if (location < v.location) { 
+			return -1; } 
+		if (location > v.location) { 
+			return 1; } 
+		return 0; 
 	}
 
 }

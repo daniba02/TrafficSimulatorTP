@@ -1,5 +1,6 @@
 package simulator.model;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -63,6 +64,7 @@ public abstract class Road extends SimulatedObject{
 			v.advance(time);
 		}
 		
+		Collections.sort(vehicle);;
 		//Ordenar la lista
 	}
 	
