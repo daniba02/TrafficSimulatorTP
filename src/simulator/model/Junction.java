@@ -1,30 +1,31 @@
 package simulator.model;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import org.json.JSONArray;
 import org.json.JSONObject;
-
-import simulator.exceptions.LimitException;
-import simulator.exceptions.SimulatorException;
 
 public class Junction extends SimulatedObject{
 	
-	private List<Road> road;
+	private List<Road> roads;
 	private Map<Junction,Road> mapa;
 	private List<List<Vehicle >> colas;
+	private Map<Road, List<Vehicle>> carreteraCola;
 	private int semaforo;
-	private int cambiosemaforo;
+	private int cambiosemaforo = 0;
 	private LightSwitchingStrategy lsStrategy;
 	private DequeuingStrategy dqStrategy;
 	private int xCoor;
 	private int yCoor;
 	
 	
-	Junction(String id, LightSwitchingStrategy lsStrategy, DequeuingStrategy dqStrategy, int xCoor, int yCoor) throws SimulatorException {
+	Junction(String id, LightSwitchingStrategy lsStrategy, DequeuingStrategy dqStrategy, int xCoor, int yCoor) {
 		super(id);
-		try {
 			compruebaNull(lsStrategy);
 			compruebaNull(dqStrategy);
 			compruebaLimit(xCoor);
@@ -33,63 +34,119 @@ public class Junction extends SimulatedObject{
 			this.dqStrategy = dqStrategy;
 			this.xCoor = xCoor;
 			this.yCoor = yCoor;
-		}
-		catch(SimulatorException e) {
-			throw new SimulatorException(e.getMessage());
-		}
+			this.roads = new ArrayList<>();
+			this.mapa = new HashMap<>();
+			this.colas = new ArrayList<>();
+			this.carreteraCola = new HashMap<>();
 	}
 
 	@Override
 	void advance(int time) {
 		
-		dqStrategy.dequeue(q)
+		int aux;
+		List<List<Vehicle>> listaAux = new LinkedList<List<Vehicle>>();
 		
+		for (List<Vehicle> list: colas) {
+			listaAux.add(dqStrategy.dequeue(list));
+		}
+		
+		colas.removeAll(listaAux);
+		
+		aux = lsStrategy.chooseNextGreen(roads, colas, semaforo, cambiosemaforo, time);
+		
+		if(aux != semaforo) {
+			semaforo = aux;
+			cambiosemaforo = time;
+		}
 	}
 
 	@Override
 	public JSONObject report() {
-		// TODO Auto-generated method stub
-		return null;
+		
+		JSONObject junction = new JSONObject();
+		
+		junction.put("id", super._id);
+		
+		if(semaforo == -1) {
+			
+			junction.put("green", "none");
+		}
+		else {
+			junction.put("green", roads.get(semaforo).getId());
+		}
+		
+		JSONArray ja = new JSONArray();
+		
+		for(int i = 0; i < roads.size(); i++) {
+			
+			JSONObject j2 = new JSONObject();
+			
+			j2.put("roads", roads.get(i).getId());
+			
+			JSONArray ja2 = new JSONArray();
+			
+			for(Vehicle v: colas.get(i)) {
+				
+				ja2.put(v.getId());
+			}
+			
+			j2.put("vehicle", ja2);
+			ja.put(j2);
+		}
+		
+		junction.put("queue", ja);
+		
+		return junction;
 	}
 	
-	void compruebaLimit(int length) throws LimitException {
+	void compruebaLimit(int length) throws IllegalArgumentException {
 		if (length < 0) {
-			throw new LimitException("La distancia tiene que ser positiva");
+			throw new IllegalArgumentException("La distancia tiene que ser positiva");
 		}
 	}
 	
-	void compruebaNull(LightSwitchingStrategy lsStrategy) throws SimulatorException {
+	void compruebaNull(LightSwitchingStrategy lsStrategy) throws IllegalArgumentException {
 		if (lsStrategy == null) {
-			throw new SimulatorException("El valor no puede ser nulo");
+			throw new IllegalArgumentException("El valor no puede ser nulo");
 		}
 	}
 	
-	void compruebaNull(DequeuingStrategy dqStrategy) throws SimulatorException {
+	void compruebaNull(DequeuingStrategy dqStrategy) throws IllegalArgumentException {
 		if (dqStrategy == null) {
-			throw new SimulatorException("El valor no puede ser nulo");
+			throw new IllegalArgumentException("El valor no puede ser nulo");
 		}
 	}
 	
-	void addIncommingRoad(Road r) throws SimulatorException {
-		List<Road> aux = new LinkedList<Road>();
+	void addIncommingRoad(Road r) throws IllegalArgumentException {
+		List<Vehicle > aux = new LinkedList<Vehicle>();
 		
 		if (r.getDest() != this) {
-			throw new SimulatorException("No pertenece al cruce");
+			throw new IllegalArgumentException("No pertenece al cruce");
 		}
-		else aux.add(r);
+		else {
+			roads.add(r);
+			
+			for(Vehicle v: r.getVehicles()) {
+				aux.add(v);
+			}
+			colas.add(aux);
+			carreteraCola.put(r, aux);
+		}
 	}
 
-	void addOutGoingROad(Road r) {
+	void addOutGoingRoad(Road r) {
 		//Hay que hacerla
+		
+		mapa.put(r.getDest(), r);
 	}
 	
 	void enter(Vehicle v) {
 		
 		try {
-			v.getCarretera().enter(v);
-		} catch (SimulatorException e) {
+			v.getRoad().enter(v);
+		} catch (IllegalArgumentException e) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
+			throw new IllegalArgumentException(e.getMessage());
 		}
 		
 		// Mirar si es con un try/catch o lanzando excepcion
@@ -97,7 +154,19 @@ public class Junction extends SimulatedObject{
 	
 	Road roadTo(Junction j) {
 		
-		Road r;
+		Iterator<Junction> it = mapa.keySet().iterator();
+		Road aux;
+		
+		while (it.hasNext()){
+			
+		  Junction key = (Junction) it.next();
+		  
+		  aux = mapa.get(key);
+		  
+		  if (aux.getSrc()==this && aux.getDest()==j) {
+			  return aux;
+		  }
+		}
 		
 		return null;
 		

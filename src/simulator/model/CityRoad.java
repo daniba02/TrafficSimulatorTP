@@ -1,11 +1,8 @@
 package simulator.model;
 
-import simulator.exceptions.LimitException;
-import simulator.exceptions.SimulatorException;
-
 public class CityRoad extends Road{
 
-	CityRoad(String id, Junction srcJunc, Junction destJunc, int maxSpeed, int contLimit, int length, Weather weather) throws SimulatorException {
+	CityRoad(String id, Junction srcJunc, Junction destJunc, int maxSpeed, int contLimit, int length, Weather weather) {
 		super(id, srcJunc, destJunc, maxSpeed, contLimit, length, weather);
 		// TODO Auto-generated constructor stub
 	}
@@ -13,12 +10,7 @@ public class CityRoad extends Road{
 	@Override
 	void reduceTotalContamination() {
 		totalCO2 -= xValue(weather);
-		try {
 			compruebaLimit(totalCO2);
-		} catch (LimitException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
 	}
 
 	@Override

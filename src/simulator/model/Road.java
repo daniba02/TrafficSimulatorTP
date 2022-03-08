@@ -1,13 +1,12 @@
 package simulator.model;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+import org.json.JSONArray;
 import org.json.JSONObject;
-
-import simulator.exceptions.LimitException;
-import simulator.exceptions.SimulatorException;
 
 public abstract class Road extends SimulatedObject{
 
@@ -19,29 +18,27 @@ public abstract class Road extends SimulatedObject{
 	protected int contLimit;
 	protected Weather weather;
 	protected int totalCO2;
-	private List<Vehicle> vehicle;
+	private List<Vehicle> vehicles;
 	
 	Road(String id, Junction srcJunc, Junction destJunc, int maxSpeed,
-			int contLimit, int length, Weather weather) throws SimulatorException{
+			int contLimit, int length, Weather weather){
 		super(id);
 		this.src = srcJunc;
 		this.dest = destJunc;
 		
-		try {
 			compruebaSpeed(maxSpeed);
 			compruebaLimit(contLimit);
 			compruebaLength(length);
 			compruebaNull(srcJunc);
+			compruebaNull(destJunc);
 			compruebaNull(weather);
 			this.maxSpeed = maxSpeed;
 			this.contLimit = contLimit;
 			this.length = length;
 			this.weather = weather;
-			
-		}
-		catch (LimitException ex) {
-			throw new SimulatorException(ex.getMessage());
-		}
+			this.vehicles = new ArrayList<>();
+			destJunc.addIncommingRoad(this);
+			srcJunc.addOutGoingRoad(this);
 	}
 	
 	abstract void reduceTotalContamination();
@@ -53,89 +50,97 @@ public abstract class Road extends SimulatedObject{
 	void advance(int time) {
 		reduceTotalContamination();
 		updateSpeedLimit();
-		for(Vehicle v: vehicle) {
+		for(Vehicle v: vehicles) {
 			
-			try {
-				v.setSpeed(calculateVehicleSpeed(v));
-			} catch (LimitException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+
+			v.setSpeed(calculateVehicleSpeed(v));
 			v.advance(time);
 		}
 		
-		Collections.sort(vehicle);;
+		Collections.sort(vehicles);
 		//Ordenar la lista
 	}
 	
-	void enter(Vehicle v) throws SimulatorException {
-		if (v.getLocalizacion() != 0 || v.getSpeed() != 0) {
-			throw new SimulatorException("La localizacion y la velocidad del vehiculo tienen que ser 0");
+	void enter(Vehicle v) {
+		if (v.getSpeed() != 0) {
+			throw new IllegalArgumentException("La velocidad tiene que ser 0");
 		}
-		else vehicle.add(v);
+		else if(v.getLocation() != 0) {
+			throw new IllegalArgumentException("La localizacion tiene que ser 0");
+		}
+		else vehicles.add(v);
 	}
 	
 	void exit(Vehicle v) {
-		vehicle.remove(v);
+		vehicles.remove(v);
 	}
 	
-	void setWeather(Weather w) throws SimulatorException {
+	void setWeather(Weather w) throws IllegalArgumentException {
 		try {
 			compruebaNull(w);
 			weather = w;
 		}
-		catch (SimulatorException e) {
-			throw new SimulatorException(e.getMessage());
+		catch (IllegalArgumentException e) {
+			throw new IllegalArgumentException(e.getMessage());
 		}
 	}
 	
-	void addContaminacion(int c) throws SimulatorException {
-		try {
-			compruebaLimit(c);
-			totalCO2 += c;
+	void addContamination(int c){
+		
+		if (c < 0) {
+			throw new IllegalArgumentException("El valor tiene que ser mayor que 0");
 		}
-		catch (LimitException e) {
-			throw new SimulatorException(e.getMessage());
-		}
+		totalCO2 += c;
 	}
 
 	@Override
 	public JSONObject report() {
-		System.out.println("id : " + super._id);
-		System.out.println("speedLimit : " + speedLimit);
-		System.out.println("weather : " + weather.name());
-		System.out.println("co2 : " + totalCO2);
-		System.out.print("vehicles : " + vehicle);
-		return null;
+		
+		JSONObject road = new JSONObject();
+		
+		road.put("id",  super._id);
+		road.put("speedLimit", speedLimit);
+		road.put("weather", weather.name());
+		road.put("co2", totalCO2);
+		
+		JSONArray ja = new JSONArray();
+		
+		for(Vehicle v: vehicles) {
+			ja.put(v.getId());
+		}
+		
+		road.put("vehicles",  ja);
+		
+		return road;
 	}
 	
-	void compruebaSpeed(int maxSpeed) throws LimitException {
-		if (maxSpeed < 0) {
-			throw new LimitException("La velocidad tiene que ser positiva");
+	void compruebaSpeed(int maxSpeed) throws IllegalArgumentException {
+		if (maxSpeed <= 0) {
+			throw new IllegalArgumentException("La velocidad tiene que ser positiva");
 		}
 	}
 	
-	void compruebaLimit(int speedLimit) throws LimitException {
-		if (speedLimit < 0) {
-			throw new LimitException("El limite tiene que ser positivo");
+	void compruebaLimit(int speedLimit) throws IllegalArgumentException {
+		if (speedLimit <= 0) {
+			throw new IllegalArgumentException("El limite tiene que ser positivo");
 		}
 	}
 	
-	void compruebaLength(int length) throws LimitException {
-		if (length < 0) {
-			throw new LimitException("La distancia tiene que ser positiva");
+	void compruebaLength(int length) throws IllegalArgumentException {
+		if (length <= 0) {
+			throw new IllegalArgumentException("La distancia tiene que ser positiva");
 		}
 	}
 	
-	void compruebaNull(Junction j) throws SimulatorException {
+	void compruebaNull(Junction j) throws IllegalArgumentException {
 		if (j == null) {
-			throw new SimulatorException("El valor no puede ser nulo");
+			throw new IllegalArgumentException("El valor no puede ser nulo");
 		}
 	}
 	
-	void compruebaNull(Weather w) throws SimulatorException {
+	void compruebaNull(Weather w) throws IllegalArgumentException {
 		if (w == null) {
-			throw new SimulatorException("El tiempo no puede ser nulo");
+			throw new IllegalArgumentException("El tiempo no puede ser nulo");
 		}
 	}
 
@@ -171,7 +176,7 @@ public abstract class Road extends SimulatedObject{
 		return totalCO2;
 	}
 
-	public List<Vehicle> getVehicle() {
-		return Collections.unmodifiableList(vehicle);
+	public List<Vehicle> getVehicles() {
+		return Collections.unmodifiableList(vehicles);
 	}
 }

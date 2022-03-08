@@ -6,15 +6,10 @@ import java.util.List;
 
 import org.json.JSONObject;
 
-import simulator.exceptions.LimitException;
-import simulator.exceptions.SimulatorException;
-import simulator.exceptions.StatusException;
-
 public class Vehicle extends SimulatedObject implements Comparable<Vehicle>{
 
 	
 	private List<Junction> itinerary;
-	private List<Junction> privItinerary;
 	private int maxSpeed;
 	private int speed;
 	private VehicleStatus status;
@@ -23,22 +18,24 @@ public class Vehicle extends SimulatedObject implements Comparable<Vehicle>{
 	private int contClass;
 	private int co2;
 	private int distance;
+	private int indice;
 	
 	Vehicle(String id, int maxSpeed, int contClass, List<Junction> itinerary) {
 		super(id);
-		
-		try {
 			compruebaSpeed(maxSpeed);
 			compruebaContClass(contClass);
 			compruebaItinerario(itinerary);
+			
 			this.maxSpeed = maxSpeed;
 			this.contClass = contClass; 
-			this.itinerary = itinerary;
-			this.privItinerary = Collections.unmodifiableList(new ArrayList<>(itinerary));
-		}
-		catch (IllegalArgumentException ex){
-			throw new IllegalArgumentException (ex.getMessage());
-		}
+			this.itinerary = Collections.unmodifiableList(new ArrayList<>(itinerary));
+			this.status = VehicleStatus.PENDING;
+			this.location = 0;
+			this.co2 = 0;
+			this.distance = 0;
+			this.indice = 0;
+			this.speed = 0;
+			this.road = null; 
 	}
 
 	@Override
@@ -46,7 +43,7 @@ public class Vehicle extends SimulatedObject implements Comparable<Vehicle>{
 		int lastLocation = location;
 		int c;
 		if(status == VehicleStatus.TRAVELING) {
-			if (location + speed < road.getLength()) { 
+			if ((location + speed) <= road.getLength()) { 
 				location = location + speed;
 			}
 			else {
@@ -55,57 +52,88 @@ public class Vehicle extends SimulatedObject implements Comparable<Vehicle>{
 			
 			c = (contClass * (location - lastLocation));
 			co2 = co2 + c;
-			try {
-				road.addContaminacion(c);
-			} catch (SimulatorException e) {
-				e.printStackTrace();
-			}
-			if (location >= road.getLength()) {
+			road.addContamination(c);
+			
+			if (location == road.getLength()) {
+				road.getDest().enter(this); 
+				indice++; 
+				speed = 0;
 				status = VehicleStatus.WAITING;
 			}
 		}
 	}
 	
-	void moveToNextRoad() throws StatusException{
+	void moveToNextRoad(){
 		
+		
+		if(status.name() == "PENDING" || status.name() == "WAITING") {
+			if(road != null) { 
+				road.exit(this);
+			}
+			if(indice == itinerary.size() - 1) {
+				road = null;
+				status = VehicleStatus.ARRIVED;
+				speed = 0;
+			}
+			else {
+				road = itinerary.get(indice).roadTo(itinerary.get(indice + 1));
+				status = VehicleStatus.TRAVELING; 
+				location = 0;
+				road.enter(this);
+			}
+		}
+		else {
+			throw new IllegalArgumentException("El estado del vehiculo tiene que ser esperando o pendiente");
+		}
 	}
 
 	@Override
 	public JSONObject report() {
-		System.out.println("id" + ":" + super._id);
-		System.out.println("speed" + ":" + speed);
-		System.out.println("distance" + ":" + distance);
-		System.out.println("co2" + ":" + co2);
-		System.out.println("class" + ":" + contClass);
-		System.out.println("status" + ":" + status.name());
 		
-		if (status != VehicleStatus.ARRIVED || status != VehicleStatus.PENDING) {
-			System.out.println("road" + ":" + road);
-			System.out.println("location" + ":" + location);
+		JSONObject vehicle = new JSONObject();
+		
+		vehicle.put("id", _id);
+		vehicle.put("speed", speed);
+		vehicle.put("distance", distance);
+		vehicle.put("co2", co2);
+		vehicle.put("class", contClass);
+		vehicle.put("status", status.name());
+		
+		if(status.name() != "PENDING" && status.name() != "ARRIVED") {
+			vehicle.put("road", road.getId());
+			vehicle.put("location", location);
 		}
-		return null;
+		
+		return vehicle;
 	}
 	
-	void setSpeed(int s) throws IllegalArgumentException{
-		compruebaSpeed(s);
-		if (s > maxSpeed) {
-			speed = maxSpeed;
+	void setSpeed(int s) {
+		if (s<0) {
+			throw new IllegalArgumentException("La velocidad tiene que ser positiva");
 		}
-		else speed = s;
+		else if(status.name()=="TRAVELING") {
+			
+			if (s >= maxSpeed) {
+				speed = maxSpeed;
+			}
+			else speed = s;
+		}
+		
 	}
 	
-	void setContaminationClass(int c) throws IllegalArgumentException {
+	void setContClass(int c){
 		compruebaContClass(c);
 		contClass = c;
+		
 	}
 	
-	void compruebaSpeed(int maxSpeed) throws IllegalArgumentException {
-		if (maxSpeed < 0) {
+	void compruebaSpeed(int maxSpeed){
+		if (maxSpeed <= 0) {
 			throw new IllegalArgumentException("La velocidad tiene que ser positiva");
 		}
 	}
 	
-	void compruebaContClass(int contClass) throws IllegalArgumentException {
+	void compruebaContClass(int contClass){
 		if (contClass < 0 || contClass > 10) {
 			throw new IllegalArgumentException("El grado de contaminacion tiene que estar entre 0 y 10");
 		}
@@ -129,15 +157,15 @@ public class Vehicle extends SimulatedObject implements Comparable<Vehicle>{
 		return speed;
 	}
 
-	public VehicleStatus getEstado() {
+	public VehicleStatus getStatus() {
 		return status;
 	}
 
-	public Road getCarretera() {
+	public Road getRoad() {
 		return road;
 	}
 
-	public int getLocalizacion() {
+	public int getLocation() {
 		return location;
 	}
 
@@ -145,7 +173,7 @@ public class Vehicle extends SimulatedObject implements Comparable<Vehicle>{
 		return contClass;
 	}
 
-	public int getCo2() {
+	public int getTotalCO2() {
 		return co2;
 	}
 	
@@ -159,9 +187,11 @@ public class Vehicle extends SimulatedObject implements Comparable<Vehicle>{
 	public int compareTo(Vehicle v) { 
 		if (location < v.location) { 
 			return -1; } 
-		if (location > v.location) { 
+		else if (location > v.location) { 
 			return 1; } 
-		return 0; 
+		else return 0; 
 	}
 
 }
+
+
