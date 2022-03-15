@@ -13,7 +13,12 @@ public class NewCityRoadEvent extends NewRoadEvent{
 		
 		src= map.getJunction(srcJunc);
 		dest = map.getJunction(destJunc);
+		
+		if(src==null) {
+			System.out.println("Hola");
+		}
 		CityRoad r = new CityRoad(id, src, dest, maxSpeed, co2Limit, length, weather);
 		map.addRoad(r);
+		
 	}
 }

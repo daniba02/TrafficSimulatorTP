@@ -24,8 +24,8 @@ public class NewCityRoadEventBuilder extends Builder<Event>{
 		src = data.getString("src");
 		dest = data.getString("dest");
 		length = data.getInt("length");
-		co2Limit = data.getInt("co2Limit");
-		maxSpeed = data.getInt("maxSpeed");
+		co2Limit = data.getInt("co2limit");
+		maxSpeed = data.getInt("maxspeed");
 		weather = data.getString("weather");
 		
 		return new NewCityRoadEvent(time, id, src, dest, length, co2Limit, maxSpeed, Weather.valueOf(weather.toUpperCase()));

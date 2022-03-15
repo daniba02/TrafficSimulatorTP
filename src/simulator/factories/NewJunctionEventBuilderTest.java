@@ -44,7 +44,6 @@ class NewJunctionEventBuilderTest {
 		ts.advance();
 
 		String s = "{\"time\":1,\"state\":{\"roads\":[],\"vehicles\":[],\"junctions\":[{\"green\":\"none\",\"queues\":[],\"id\":\"j1\"}]}}";
-
 		assertTrue(new JSONObject(s).similar(ts.report()));
 
 	}

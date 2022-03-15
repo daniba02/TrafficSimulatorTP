@@ -140,7 +140,6 @@ class InterCityRoadTest {
 		v2.moveToNextRoad();
 
 		String s = "{\"speedlimit\":100,\"co2\":0,\"weather\":\"SUNNY\",\"vehicles\":[\"v1\",\"v2\"],\"id\":\"r1\"}\n";
-
 		assertTrue(new JSONObject(s).similar(r1.report()));
 
 		r1.advance(1);

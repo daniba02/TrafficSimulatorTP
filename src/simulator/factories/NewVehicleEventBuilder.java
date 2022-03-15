@@ -25,7 +25,7 @@ public class NewVehicleEventBuilder extends Builder<Event>{
 		
 		time =data.getInt("time");
 		id= data.getString("id");
-		maxSpeed = data.getInt("maxSpeed");
+		maxSpeed = data.getInt("maxspeed");
 		clase = data.getInt("class");
 		
 		JSONArray ja = new JSONArray();

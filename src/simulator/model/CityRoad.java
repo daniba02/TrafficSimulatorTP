@@ -12,13 +12,14 @@ public class CityRoad extends Road{
 		totalCO2 = totalCO2 - xValue(weather);
 			//compruebaLimit(totalCO2);
 		if (totalCO2 < 0) {
-			throw new IllegalArgumentException("El limite tiene que ser positivo");
-			//totalCO2 = 0;
+			
+			totalCO2 = 0;
 		}
 	}
 
 	@Override
 	void updateSpeedLimit() {
+		super.speedLimit = maxSpeed;
 	}
 
 	@Override

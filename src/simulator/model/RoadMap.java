@@ -78,32 +78,17 @@ public class RoadMap {
 	}
 	public Junction getJunction(String id) {
 		
-		for(Junction ju: cruces){
-			if (id == ju.getId()) {
-				return ju;
-			}
-		}
-		return null;
+		return mapaCruces.get(id);
 	}
 	
 	public Road getRoad(String id) {
 		
-		for(Road ro: carreteras){
-			if (id == ro.getId()) {
-				return ro;
-			}
-		}
-		return null;
+		return mapaCarreteras.get(id);
 	}
 	
 	public Vehicle getVehicle(String id) {
 		
-		for(Vehicle ve: vehiculos){
-			if (id == ve.getId()) {
-				return ve;
-			}
-		}
-		return null;
+		return mapaVehiculos.get(id);
 	}
 	
 	public List<Junction>getJunctions(){

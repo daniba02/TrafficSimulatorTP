@@ -153,7 +153,7 @@ public class Main {
 		TrafficSimulator simulator = new TrafficSimulator();
 		Controller controller = new Controller(simulator, _eventsFactory);
 		controller.loadEvents(input);
-		input.close();
+		//input.close();
 		controller.run(ticks, output);
 		
 	}

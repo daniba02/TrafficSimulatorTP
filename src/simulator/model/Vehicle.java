@@ -50,6 +50,7 @@ public class Vehicle extends SimulatedObject implements Comparable<Vehicle>{
 				location = road.getLength();
 			}
 			
+			distance += (location - lastLocation); 
 			c = (contClass * (location - lastLocation));
 			co2 = co2 + c;
 			road.addContamination(c);
@@ -185,11 +186,9 @@ public class Vehicle extends SimulatedObject implements Comparable<Vehicle>{
 	
 	@Override
 	public int compareTo(Vehicle v) { 
-		if (location < v.location) { 
-			return -1; } 
-		else if (location > v.location) { 
+		if (location <= v.location) { 
 			return 1; } 
-		else return 0; 
+		else return -1;
 	}
 
 }

@@ -29,20 +29,16 @@ public class Controller {
 	
 	public void run(int n, OutputStream out) {
 		
-		PrintStream print = new PrintStream(out);
-        print.println("{   \\\"states\\\": [");
-        
-		for(int i = 0; i < n; i++) {
-			
-			sim.advance();
-			
-			print.println(sim.report().toString() + ",");
-			
-		}
+		JSONObject object = new JSONObject();
+		JSONArray array = new JSONArray();
 		
-		print.println("] ");
-		print.println("}");
-
+		for (int i = 0; i < n; i++) {
+			sim.advance();
+			array.put(sim.report());
+		}
+		object.put("states", array);
+		PrintStream p = new PrintStream(out);
+		p.println(object);
 		
 	}
 	
