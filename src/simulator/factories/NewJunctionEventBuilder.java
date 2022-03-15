@@ -29,7 +29,7 @@ public class NewJunctionEventBuilder extends Builder<Event>{
 		String id;
 		
 		time = data.getInt("time");
-		id = data.getString("string");
+		id = data.getString("id");
 		
 		JSONArray ja = new JSONArray();
 		

@@ -17,7 +17,7 @@ public abstract class Road extends SimulatedObject{
 	protected int speedLimit;
 	protected int contLimit;
 	protected Weather weather;
-	protected int totalCO2;
+	protected int totalCO2 = 0;
 	private List<Vehicle> vehicles;
 	
 	Road(String id, Junction srcJunc, Junction destJunc, int maxSpeed,

@@ -38,7 +38,7 @@ public class TrafficSimulator {
 			
 			if (e.getTime() == time) {
 				e.execute(mapaCarreteras);
-				events.remove(e);
+				//events.remove(e);
 			}
 		}
 		for(Junction j: mapaCarreteras.getJunctions()) {

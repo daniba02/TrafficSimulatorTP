@@ -9,8 +9,12 @@ public class CityRoad extends Road{
 
 	@Override
 	void reduceTotalContamination() {
-		totalCO2 -= xValue(weather);
-			compruebaLimit(totalCO2);
+		totalCO2 = totalCO2 - xValue(weather);
+			//compruebaLimit(totalCO2);
+		if (totalCO2 < 0) {
+			throw new IllegalArgumentException("El limite tiene que ser positivo");
+			//totalCO2 = 0;
+		}
 	}
 
 	@Override
@@ -26,7 +30,7 @@ public class CityRoad extends Road{
 	
 	int xValue(Weather w) {
 		int x = 2;
-		if (w.name() == "SUNNY" || w.name() == "STORM") {
+		if (w.name() == "WINDY" || w.name() == "STORM") {
 			x = 10;
 		}
 		return x;

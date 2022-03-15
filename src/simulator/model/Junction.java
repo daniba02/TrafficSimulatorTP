@@ -169,8 +169,6 @@ public class Junction extends SimulatedObject{
 		}
 		
 		return null;
-		
-		//No esta hecha
 	}
 
 }
