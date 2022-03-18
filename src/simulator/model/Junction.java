@@ -33,24 +33,43 @@ public class Junction extends SimulatedObject {
 		this.dqStrategy = dqStrategy;
 		this.xCoor = xCoor;
 		this.yCoor = yCoor;
-		this.roads = new ArrayList<>();
-		this.mapa = new HashMap<>();
-		this.colas = new ArrayList<>();
-		this.carreteraCola = new HashMap<>();
+		this.roads = new ArrayList<Road>();
+		this.mapa = new HashMap<Junction, Road>();
+		this.colas = new ArrayList<List<Vehicle>>();
+		this.carreteraCola = new HashMap<Road, List<Vehicle>>();
 	}
 
 	@Override
 	void advance(int time) {
 
 		int aux;
-		List<List<Vehicle>> listaAux = new LinkedList<List<Vehicle>>();
-
-		for (List<Vehicle> list : colas) {
-			listaAux.add(dqStrategy.dequeue(list));
+		
+		if(semaforo != -1) {
+			
+			List<Vehicle> listaAux = new LinkedList<Vehicle>();
+			
+			listaAux = dqStrategy.dequeue(colas.get(semaforo));
+			
+			for(int i = 0; i < listaAux.size(); i++) {
+				
+				Vehicle v = listaAux.get(i);
+				v.moveToNextRoad();
+				colas.get(semaforo).remove(v);
+			}
+			//colas.get(semaforo).remove(listaAux);
+			//colas.remove(listaAux);
 		}
+		
+		/*if(semaforo != -1) {
+			List<List<Vehicle>> listaAux = new LinkedList<List<Vehicle>>();
 
-		colas.removeAll(listaAux);
+	        for (List<Vehicle> list : colas) {
+	            listaAux.add(dqStrategy.dequeue(list));
+	        }
 
+	        colas.removeAll(listaAux);
+		}*/
+		
 		aux = lsStrategy.chooseNextGreen(roads, colas, semaforo, cambiosemaforo, time);
 
 		if (aux != semaforo) {
@@ -116,7 +135,7 @@ public class Junction extends SimulatedObject {
 	}
 
 	void addIncommingRoad(Road r) throws IllegalArgumentException {
-		List<Vehicle> aux = new LinkedList<Vehicle>();
+		List<Vehicle> aux = new ArrayList<Vehicle>();
 
 		if (r.getDest() != this) {
 			throw new IllegalArgumentException("No pertenece al cruce");
@@ -140,7 +159,8 @@ public class Junction extends SimulatedObject {
 	void enter(Vehicle v) {
 
 		try {
-			v.getRoad().enter(v);
+			//v.getRoad().enter(v);
+			carreteraCola.get(v.getRoad()).add(v);
 		} catch (IllegalArgumentException e) {
 			// TODO Auto-generated catch block
 			throw new IllegalArgumentException(e.getMessage());

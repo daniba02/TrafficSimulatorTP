@@ -57,7 +57,7 @@ public class Controller {
 		else {
 			JSONArray ja = jo.getJSONArray("events");
 			
-			for(int i = 0; i< jo.length(); i++) {
+			for(int i = 0; i< ja.length(); i++) {
 				
 				Event e;
 				e = eventsFactory.createInstance(ja.getJSONObject(i));

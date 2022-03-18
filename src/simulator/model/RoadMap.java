@@ -20,12 +20,12 @@ public class RoadMap {
 	
 	RoadMap(){
 		
-		this.cruces = new ArrayList<>();
-		this.carreteras = new ArrayList<>();
-		this.vehiculos = new ArrayList<>();
-		this.mapaCruces = new HashMap<>();
-		this.mapaCarreteras = new HashMap<>();
-		this.mapaVehiculos = new HashMap<>();
+		this.cruces = new ArrayList<Junction>();
+		this.carreteras = new ArrayList<Road>();
+		this.vehiculos = new ArrayList<Vehicle>();
+		this.mapaCruces = new HashMap<String, Junction>();
+		this.mapaCarreteras = new HashMap<String, Road>();
+		this.mapaVehiculos = new HashMap<String, Vehicle>();
 	}
 	
 	void addJunction(Junction j) {
@@ -136,9 +136,9 @@ public class RoadMap {
 			ja3.put(v.report());
 		}
 		
-		roadmap.put("junctions", ja);
 		roadmap.put("roads", ja2);
 		roadmap.put("vehicles", ja3);
+		roadmap.put("junctions", ja);
 		
 		return roadmap;
 	}

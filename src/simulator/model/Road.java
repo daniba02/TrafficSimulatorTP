@@ -36,7 +36,7 @@ public abstract class Road extends SimulatedObject {
 		this.contLimit = contLimit;
 		this.length = length;
 		this.weather = weather;
-		this.vehicles = new ArrayList<>();
+		this.vehicles = new ArrayList<Vehicle>();
 		destJunc.addIncommingRoad(this);
 		srcJunc.addOutGoingRoad(this);
 	}
