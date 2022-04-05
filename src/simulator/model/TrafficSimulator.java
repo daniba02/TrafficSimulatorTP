@@ -5,13 +5,15 @@ import java.util.List;
 import org.json.JSONObject;
 
 import simulator.misc.SortedArrayList;
+import simulator.model.TrafficSimObserver;
 
-public class TrafficSimulator {
+public class TrafficSimulator implements Observable<TrafficSimObserver>{
 
 	
 	private RoadMap mapaCarreteras;
 	private  List<Event> events;
 	private int time;
+	private TrafficSimObserver obs;
 	
 	public TrafficSimulator(){
 		
@@ -24,7 +26,7 @@ public class TrafficSimulator {
 	public void addEvent(Event e) {
 		
 		events.add(e);
-		
+		obs.onEventAdded(mapaCarreteras, events, e, time);
 		
 		
 		//queda ordenar la lista
@@ -34,19 +36,33 @@ public class TrafficSimulator {
 		
 		time++;
 		
-		for(Event e: events) {
-			
-			if (e.getTime() == time) {
-				e.execute(mapaCarreteras);
-				//events.remove(e);
+		obs.onAdvanceStart(mapaCarreteras, events, time);
+		
+		try {
+			for(Event e: events) {
+				
+				if (e.getTime() == time) {
+					e.execute(mapaCarreteras);
+					//events.remove(e);
+				}
 			}
+			
+			// Aqui hay que eliminar los eventos de la lista de eventos
+			
+			
+			for(Junction j: mapaCarreteras.getJunctions()) {
+				j.advance(time);
+			}
+			for(Road r: mapaCarreteras.getRoads()) {
+				r.advance(time);
+			}
+		}catch(IllegalArgumentException e) {
+			obs.onError(e.getMessage());
+			throw new IllegalArgumentException(e.getMessage());
 		}
-		for(Junction j: mapaCarreteras.getJunctions()) {
-			j.advance(time);
-		}
-		for(Road r: mapaCarreteras.getRoads()) {
-			r.advance(time);
-		}
+		
+		
+		obs.onAdvanceEnd(mapaCarreteras, events, time);
 	}
 	
 	public void reset() {
@@ -54,6 +70,7 @@ public class TrafficSimulator {
 		mapaCarreteras.reset();
 		events.clear();
 		time = 0;
+		obs.onReset(mapaCarreteras, events, time);
 	}
 	
 	public JSONObject report() {
@@ -64,5 +81,17 @@ public class TrafficSimulator {
 		traffic.put("state", mapaCarreteras.report());
 		
 		return traffic;
+	}
+
+	@Override
+	public void addObserver(TrafficSimObserver o) {
+		obs = o;
+		obs.onRegister(mapaCarreteras, events, time);
+	}
+
+	@Override
+	public void removeObserver(TrafficSimObserver o) {
+		// TODO Auto-generated method stub
+		
 	}
 }

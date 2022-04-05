@@ -37,4 +37,9 @@ public class SetWeatherEvent extends Event{
 			}
 		}
 	}
+	
+	@Override
+	public String toString() {
+		return "New Vehicle '"+ws+"'";
+	}
 }

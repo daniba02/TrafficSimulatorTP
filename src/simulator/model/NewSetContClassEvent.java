@@ -33,5 +33,11 @@ public class NewSetContClassEvent extends Event{
 			}
 		}
 	}
+	
+	@Override
+	public String toString() {
+		return "New Cont Class '"+cs+"'";
+	}
+	
 
 }

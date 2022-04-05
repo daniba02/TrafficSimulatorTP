@@ -31,7 +31,5 @@ public class NewRoadEvent extends Event{
 	void execute(RoadMap map) {
 		
 	}
-	
-	
 
 }
