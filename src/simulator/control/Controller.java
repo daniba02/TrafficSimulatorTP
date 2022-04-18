@@ -3,6 +3,8 @@ package simulator.control;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintStream;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -18,6 +20,8 @@ public class Controller {
 	
 	private TrafficSimulator sim;
 	private Factory<Event> eventsFactory;
+	//private List<Event> listaDeEventos = new ArrayList<Event>();
+	private int totalN = 0;
 	
 	public Controller(TrafficSimulator sim, Factory<Event> eventsFactory){
 	
@@ -36,11 +40,26 @@ public class Controller {
 		for (int i = 0; i < n; i++) {
 			sim.advance();
 			array.put(sim.report());
+			totalN ++;
 		}
 		object.put("states", array);
 		PrintStream p = new PrintStream(out);
 		p.println(object);
 		
+	}
+	
+	public void run (int n) {
+		
+		JSONObject object = new JSONObject();
+		JSONArray array = new JSONArray();
+		
+		for (int i = 0; i < n; i++) {
+			sim.advance();
+			array.put(sim.report());
+			totalN ++;
+		}
+		
+		object.put("states", array);
 	}
 	
 	public void reset() {
@@ -79,8 +98,5 @@ public class Controller {
 	public void addEvent(Event e){
 		sim.addEvent(e);
 	}
-	
-	
-	
 }
 

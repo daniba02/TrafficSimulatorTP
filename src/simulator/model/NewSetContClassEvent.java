@@ -36,8 +36,14 @@ public class NewSetContClassEvent extends Event{
 	
 	@Override
 	public String toString() {
-		return "New Cont Class '"+cs+"'";
+		String s = "";
+		
+		for(Pair<String,Integer> w: cs) {
+			
+			s+="(" + w.getFirst().toString() + ",";
+			s+=w.getSecond().toString()+ ")";
+		}
+		return "New Cont Class: ["+s+"]";
 	}
-	
 
 }

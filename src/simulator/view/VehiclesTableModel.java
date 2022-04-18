@@ -6,61 +6,46 @@ import javax.swing.table.AbstractTableModel;
 
 import simulator.control.Controller;
 import simulator.model.Event;
+import simulator.model.Observable;
 import simulator.model.RoadMap;
 import simulator.model.TrafficSimObserver;
+import simulator.model.Vehicle;
 
-public class EventsTableModel extends AbstractTableModel implements TrafficSimObserver{
+public class VehiclesTableModel extends AbstractTableModel implements TrafficSimObserver{
 
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
-	
-	
-	private List<Event> _events;
-	private String[] _colNames = {"Time", "Desc" };
 
-	public EventsTableModel() {
-		_events=null;
-	}
+	private List<Vehicle> _vehiculos;
+	private String[] _colNames = { "Id", "Location", "Itinerary", "CO2 Class", "Max Speed", "Speed", "Total CO2", "Distance" };
 	
-	public EventsTableModel(Controller ctrl) {
-		//_events = ctrl.getSim().getEvents();
+	public VehiclesTableModel(Controller ctrl) {
 		update();
 		ctrl.addObserver(this);
 	}
-
-	public void update() {
-		// observar que si no refresco la tabla no se carga
-		// La tabla es la represantación visual de una estructura de datos,
-		// en este caso de un ArrayList, hay que notificar los cambios.
-		
-		// We need to notify changes, otherwise the table does not refresh.
-		fireTableDataChanged();;		
-	}
 	
-	public void setEventsList(List<Event> events) {
-		_events = events;
+	public void setEventsList(List<Vehicle> vehicles) {
+		_vehiculos = vehicles;
 		update();
 	}
-
+	
+	public void update() {
+		fireTableDataChanged();
+	}
+	
 	@Override
 	public boolean isCellEditable(int row, int column) {
 		return false;
 	}
 
-	//si no pongo esto no coge el nombre de las columnas
-	//
-	//this is for the column header
 	@Override
 	public String getColumnName(int col) {
 		return _colNames[col];
 	}
-
+	
 	@Override
-	// método obligatorio, probad a quitarlo, no compila
-	//
-	// this is for the number of columns
 	public int getColumnCount() {
 		return _colNames.length;
 	}
@@ -70,7 +55,7 @@ public class EventsTableModel extends AbstractTableModel implements TrafficSimOb
 	//
 	// the number of row, like those in the events list
 	public int getRowCount() {
-		return _events == null ? 0 : _events.size();
+		return _vehiculos == null ? 0 : _vehiculos.size();
 	}
 
 	@Override
@@ -84,46 +69,63 @@ public class EventsTableModel extends AbstractTableModel implements TrafficSimOb
 		Object s = null;
 		switch (columnIndex) {
 		case 0:
-			s = _events.get(rowIndex).getTime();
+			s = _vehiculos.get(rowIndex).getId();
 			break;
 		case 1:
-			s = _events.get(rowIndex).toString();
+			s = _vehiculos.get(rowIndex).getRoad() + ":" + _vehiculos.get(rowIndex).getLocation();
+			break;
+		case 2:
+			s = _vehiculos.get(rowIndex).getItinerary();
+			break;
+		case 3:
+			s = _vehiculos.get(rowIndex).getContClass();
+			break;
+		case 4:
+			s = _vehiculos.get(rowIndex).getMaxSpeed();
+			break;
+		case 5:
+			s = _vehiculos.get(rowIndex).getSpeed();
+			break;
+		case 6:
+			s = _vehiculos.get(rowIndex).getTotalCO2();
+			break;
+		case 7:
+			s = _vehiculos.get(rowIndex).getDistance();
 			break;
 		}
+		
 		return s;
 	}
 
 	@Override
 	public void onAdvanceStart(RoadMap map, List<Event> events, int time) {
-		this._events = events;
-		update();
 		
 	}
 
 	@Override
 	public void onAdvanceEnd(RoadMap map, List<Event> events, int time) {
-		this._events = events;
+		this._vehiculos = map.getVehicles();
 		update();
 		
 	}
 
 	@Override
 	public void onEventAdded(RoadMap map, List<Event> events, Event e, int time) {
-		this._events = events;
+		this._vehiculos = map.getVehicles();
 		update();
 		
 	}
 
 	@Override
 	public void onReset(RoadMap map, List<Event> events, int time) {
-		this._events = events;
+		this._vehiculos = map.getVehicles();
 		update();
 		
 	}
 
 	@Override
 	public void onRegister(RoadMap map, List<Event> events, int time) {
-		this._events = events;
+		this._vehiculos = map.getVehicles();
 		update();
 		
 	}
@@ -133,4 +135,6 @@ public class EventsTableModel extends AbstractTableModel implements TrafficSimOb
 		// TODO Auto-generated method stub
 		
 	}
+
+
 }

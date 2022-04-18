@@ -190,6 +190,10 @@ public class Vehicle extends SimulatedObject implements Comparable<Vehicle>{
 			return 1; } 
 		else return -1;
 	}
+	
+	public int getDistance() {
+		return distance;
+	}
 
 }
 

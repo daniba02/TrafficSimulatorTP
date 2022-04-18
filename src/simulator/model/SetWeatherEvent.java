@@ -20,7 +20,6 @@ public class SetWeatherEvent extends Event{
 
 	@Override
 	
-	//Esto está mal hecho
 	
 	void execute(RoadMap map) {
 		// TODO Auto-generated method stub
@@ -40,6 +39,14 @@ public class SetWeatherEvent extends Event{
 	
 	@Override
 	public String toString() {
-		return "New Vehicle '"+ws+"'";
+		String s = "";
+		
+		for(Pair<String,Weather> w: ws) {
+			
+			s+="(" + w.getFirst().toString() + ",";
+			s+=w.getSecond().toString()+ ")";
+		}
+		return "Change Weather: ["+s+"]";
 	}
+	
 }

@@ -6,61 +6,43 @@ import javax.swing.table.AbstractTableModel;
 
 import simulator.control.Controller;
 import simulator.model.Event;
+import simulator.model.Junction;
+import simulator.model.Road;
 import simulator.model.RoadMap;
 import simulator.model.TrafficSimObserver;
 
-public class EventsTableModel extends AbstractTableModel implements TrafficSimObserver{
+public class JunctionsTableModel extends AbstractTableModel implements TrafficSimObserver{
 
-	/**
-	 * 
-	 */
+	
 	private static final long serialVersionUID = 1L;
+	private List<Junction> _junctions;
+	private String[] _colNames = { "Id", "Green", "Queues"};
 	
-	
-	private List<Event> _events;
-	private String[] _colNames = {"Time", "Desc" };
-
-	public EventsTableModel() {
-		_events=null;
-	}
-	
-	public EventsTableModel(Controller ctrl) {
-		//_events = ctrl.getSim().getEvents();
+	public JunctionsTableModel(Controller ctrl) {
 		update();
 		ctrl.addObserver(this);
 	}
-
-	public void update() {
-		// observar que si no refresco la tabla no se carga
-		// La tabla es la represantación visual de una estructura de datos,
-		// en este caso de un ArrayList, hay que notificar los cambios.
-		
-		// We need to notify changes, otherwise the table does not refresh.
-		fireTableDataChanged();;		
-	}
 	
-	public void setEventsList(List<Event> events) {
-		_events = events;
+	public void setEventsList(List<Junction> roads) {
+		_junctions = roads;
 		update();
 	}
-
+	
+	public void update() {
+		fireTableDataChanged();
+	}
+	
 	@Override
 	public boolean isCellEditable(int row, int column) {
 		return false;
 	}
 
-	//si no pongo esto no coge el nombre de las columnas
-	//
-	//this is for the column header
 	@Override
 	public String getColumnName(int col) {
 		return _colNames[col];
 	}
-
+	
 	@Override
-	// método obligatorio, probad a quitarlo, no compila
-	//
-	// this is for the number of columns
 	public int getColumnCount() {
 		return _colNames.length;
 	}
@@ -70,7 +52,7 @@ public class EventsTableModel extends AbstractTableModel implements TrafficSimOb
 	//
 	// the number of row, like those in the events list
 	public int getRowCount() {
-		return _events == null ? 0 : _events.size();
+		return _junctions == null ? 0 : _junctions.size();
 	}
 
 	@Override
@@ -84,46 +66,59 @@ public class EventsTableModel extends AbstractTableModel implements TrafficSimOb
 		Object s = null;
 		switch (columnIndex) {
 		case 0:
-			s = _events.get(rowIndex).getTime();
+			s = _junctions.get(rowIndex).getId();
 			break;
 		case 1:
-			s = _events.get(rowIndex).toString();
+			//s = _junctions.get(rowIndex).getGreenLightIndex();
+			s = verde(_junctions.get(rowIndex));
+			break;
+		case 2:
+			s = _junctions.get(rowIndex).getInRoads();
 			break;
 		}
+		
 		return s;
+	}
+	
+	public String verde(Junction j) {
+		
+		if (j.getGreenLightIndex() == -1) {
+			return "NONE";
+		}
+		else return j.getInRoads().get(j.getGreenLightIndex()).toString();
 	}
 
 	@Override
 	public void onAdvanceStart(RoadMap map, List<Event> events, int time) {
-		this._events = events;
+		this._junctions = map.getJunctions();
 		update();
 		
 	}
 
 	@Override
 	public void onAdvanceEnd(RoadMap map, List<Event> events, int time) {
-		this._events = events;
+		this._junctions = map.getJunctions();
 		update();
 		
 	}
 
 	@Override
 	public void onEventAdded(RoadMap map, List<Event> events, Event e, int time) {
-		this._events = events;
+		this._junctions = map.getJunctions();
 		update();
 		
 	}
 
 	@Override
 	public void onReset(RoadMap map, List<Event> events, int time) {
-		this._events = events;
+		this._junctions = map.getJunctions();
 		update();
 		
 	}
 
 	@Override
 	public void onRegister(RoadMap map, List<Event> events, int time) {
-		this._events = events;
+		this._junctions = map.getJunctions();
 		update();
 		
 	}

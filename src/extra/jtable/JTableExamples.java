@@ -18,6 +18,9 @@ import javax.swing.JTable;
 import javax.swing.SpinnerNumberModel;
 import javax.swing.SwingUtilities;
 import javax.swing.border.TitledBorder;
+
+import simulator.view.EventsTableModel;
+
 import javax.swing.border.Border;
 
 import java.awt.event.ActionEvent;
@@ -106,7 +109,7 @@ public class JTableExamples extends JFrame {
 
 		// the actual events list
 		_events = new ArrayList<EventEx>();
-		_model.setEventsList(_events);
+		//_model.setEventsList(_events);
 
 		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		this.setSize(700, 300);
